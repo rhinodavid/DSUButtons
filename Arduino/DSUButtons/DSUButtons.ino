@@ -9,7 +9,7 @@ const int relay2 = 6;
 
 //CAN
 const int SPI_CS_PIN = 9;
-unsigned char flagRecv = 0;
+unsigned char flagRecv = 1;
 unsigned char len = 3;
 unsigned char buf[8];
 unsigned long interval=100; // the time we need to wait
@@ -25,7 +25,8 @@ int fdistanceState = 1;
 int lanewarnState = 1;
 int lane100mscount = 0;
 int dist100mscount = 0;
-int relaystate = 1; // 0 = DSU off
+int relaystate1 = 1; // 1 = DSU off
+int relaystate2 = 1; // 1 = remote off
 
 ////SERIAL INPUT (UNUSED)
 //char receivedChar;
@@ -38,8 +39,8 @@ void setup()
   pinMode(relay1, OUTPUT);
   pinMode(relay2, OUTPUT);
 
-  digitalWrite(relay1, relaystate); //Remember Relay is Backward - HIGH means off
-  digitalWrite(relay2, relaystate);
+  digitalWrite(relay1, relaystate1); //Remember Relay is Backward - HIGH means off
+  digitalWrite(relay2, relaystate2);
 
   //Serial 
   Serial.begin(115200);
@@ -49,7 +50,7 @@ void setup()
   SPI.setClockDivider(SPI_CLOCK_DIV2);
   
  //CAN
-    while (CAN_OK != CAN.begin(CAN_1000KBPS))              // init can bus : baudrate = 1000                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            00k
+    while (CAN_OK != CAN.begin(CAN_500KBPS))              // init can bus : baudrate = 500                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            00k
     {
         Serial.println("CAN BUS Shield init fail");
         Serial.println(" Init CAN BUS Shield again");
@@ -105,21 +106,32 @@ void loop()
       JOEL_ID[1] = 0b00000000;
       lane100mscount = 0;
     }
-    CAN.sendMsgBuf(canSendId, 0, 2, JOEL_ID);
+    //CAN.sendMsgBuf(canSendId, 0, 2, JOEL_ID);
     //Serial.println(dist100mscount);
-    if ((fdistanceState == LOW) && (dist100mscount == 50)) {
+    if ((fdistanceState == LOW) && (dist100mscount > 50)) {
       dist100mscount = 0;
-      if (relaystate == 0){
-        relaystate = 1;
-        Serial.println("relay=1");
-        digitalWrite(relay1, relaystate);
-        digitalWrite(relay2, relaystate);
+      if (relaystate1 == 0){
+        relaystate1 = 1;
+        Serial.println("relay1=1");
+        digitalWrite(relay1, relaystate1);
+      }
+      else if (relaystate1 == 1) {
+        relaystate1 = 0;
+        Serial.println("relay1=0");
+        digitalWrite(relay1, relaystate1);
+      }
+    }
+    if ((lanewarnState == LOW) && (lane100mscount > 50)) {
+      lane100mscount = 0;
+      if (relaystate2 == 0){
+        relaystate2 = 1;
+        Serial.println("relay2=1");
+        digitalWrite(relay2, relaystate2);
       }
       else if (relaystate == 1) {
-        relaystate = 0;
-        Serial.println("relay=0");
-        digitalWrite(relay1, relaystate);
-        digitalWrite(relay2, relaystate);
+        relaystate2 = 0;
+        Serial.println("relay2=0");
+        digitalWrite(relay2, relaystate2);
       }
     }
     previousMillis = millis();
