@@ -8,7 +8,7 @@ const int relay1 = 5;
 const int relay2 = 6;
 
 //CAN
-const int SPI_CS_PIN = 9;
+const int SPI_CS_PIN = 10;
 unsigned char flagRecv = 1;
 unsigned char len = 3;
 unsigned char buf[8];
