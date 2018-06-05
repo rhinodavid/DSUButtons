@@ -16,7 +16,7 @@ unsigned char buf[8];
 unsigned long interval=100; // the time we need to wait
 unsigned long previousMillis=0; // millis() returns an unsigned long.
 //unsigned char stmp[5] = {0, 0, 0, 0, 0};
-unsigned char JOEL_ID[2] = {0x02, 0x01};
+unsigned char JOEL_ID[3] = {0x02, 0x01, 0x00};
 unsigned char stmp[8] = {0x00, 0x64, 0x00, 0x28, 0x00, 0x00, 0x00, 0x00};
 unsigned char NEW_MSG_1[8] = {0};
 MCP_CAN CAN(SPI_CS_PIN);
@@ -125,6 +125,9 @@ void loop()
       lane100mscount++;
     } else {
       lane100mscount = 0;
+      relaystate2 = 1;
+      Serial.println("relay2=0");
+      digitalWrite(relay2, relaystate2);
     }
     if ((lanewarnState == LOW) && (lane100mscount > 1)) {
        if (JOEL_ID[1] == 0x01)
@@ -153,25 +156,19 @@ void loop()
         digitalWrite(relay1, relaystate1);
       }
     }
-    if ((lanewarnState == LOW) && (lane100mscount == 10)) {
-      //CAN.sendMsgBuf(canSendId, 0, 2, stmp);
-     lane100mscount = 0
-      if (relaystate2 == 0){
-        relaystate2 = 1;
+    if ((lanewarnState == LOW) && (lane100mscount > 5)) {
+      
+      if ((fdistanceState == LOW) && (JOEL_ID[2] == 0x00)){
+        JOEL_ID[2]=0x01;
+        lane100mscount = 0;
+      } else if ((fdistanceState == LOW) && (JOEL_ID[2] == 0x01)){
+        JOEL_ID[2]=0x00;
+        lane100mscount = 0;
+      } else {
+        relaystate2 = 0;
         Serial.println("relay2=1");
         digitalWrite(relay2, relaystate2);
-        
       }
-      else if (relaystate2 == 1) {
-        relaystate2 = 0;
-        Serial.println("relay2=0");
-        digitalWrite(relay2, relaystate2);
-      }
-    else if ((lanewarnState == HIGH) && (relaystate2 == 1))
-        relaystate2 = 0;
-        lane100mscount = 0;
-        Serial.println("relay2=0");
-        digitalWrite(relay2, relaystate2);
     }
 
     previousMillis = millis();
