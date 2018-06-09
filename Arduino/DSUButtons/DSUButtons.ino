@@ -107,7 +107,7 @@ void loop()
     } else {
       dist100mscount = 0;
     }
-    if ((fdistanceState == LOW) && (dist100mscount > 1)) {
+    if ((fdistanceState == LOW) && (dist100mscount > 2)) {
        if (JOEL_ID[0] == 0x02)
        {
           JOEL_ID[0] = 0x03;
@@ -129,7 +129,7 @@ void loop()
       Serial.println("relay2=0");
       digitalWrite(relay2, relaystate2);
     }
-    if ((lanewarnState == LOW) && (lane100mscount > 1)) {
+    if ((lanewarnState == LOW) && (lane100mscount > 2)) {
        if (JOEL_ID[1] == 0x01)
        {
           JOEL_ID[1] = 0x00;
@@ -139,7 +139,7 @@ void loop()
           JOEL_ID[1] = 0x01;
        }
     }
-    CAN.sendMsgBuf(canSendId, 0, 2, JOEL_ID);
+    CAN.sendMsgBuf(canSendId, 0, 3, JOEL_ID);
     //Serial.println(dist100mscount);
     if ((fdistanceState == LOW) && (dist100mscount == 50)) {
       //CAN.sendMsgBuf(canSendId, 0, 2, stmp);
@@ -157,17 +157,18 @@ void loop()
       }
     }
     if ((lanewarnState == LOW) && (lane100mscount > 5)) {
-      
-      if ((fdistanceState == LOW) && (JOEL_ID[2] == 0x00)){
-        JOEL_ID[2]=0x01;
-        lane100mscount = 0;
-      } else if ((fdistanceState == LOW) && (JOEL_ID[2] == 0x01)){
-        JOEL_ID[2]=0x00;
-        lane100mscount = 0;
-      } else {
-        relaystate2 = 0;
-        Serial.println("relay2=1");
-        digitalWrite(relay2, relaystate2);
+      relaystate2 = 0;
+      Serial.println("relay2=1");
+      digitalWrite(relay2, relaystate2);
+      if (fdistanceState == LOW) {
+       if (JOEL_ID[2] == 0x01)
+       {
+          JOEL_ID[2] = 0x00;
+       }
+       else if (JOEL_ID[2] == 0x00)
+       {
+          JOEL_ID[2] = 0x01;
+       }
       }
     }
 
