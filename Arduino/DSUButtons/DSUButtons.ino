@@ -27,6 +27,8 @@ int fdistanceState = 1;
 int lanewarnState = 1;
 int lane100mscount = 0;
 int dist100mscount = 0;
+int lane100mscount2 = 0;
+int dist100mscount2 = 0;
 int relaystate1 = 1; // 0 = DSU off
 int relaystate2 = 1; // 0 = remote off
 
@@ -61,7 +63,7 @@ void setup()
   delay(1000);
   delay(1000);  
  //CAN
-    while (CAN_OK != CAN.begin(CAN_500KBPS))              // init can bus : baudrate = 1000                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            00k
+    while (CAN_OK != CAN.begin(CAN_500KBPS))              // init can bus : baudrate = 500                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            00k
     {
         Serial.println("CAN BUS Shield init fail");
         Serial.println(" Init CAN BUS Shield again");
@@ -104,10 +106,13 @@ void loop()
 
     if (fdistanceState == LOW) {
       dist100mscount++;
+      dist100mscount2++;
     } else {
       dist100mscount = 0;
+      dist100mscount2 = 0;
     }
     if ((fdistanceState == LOW) && (dist100mscount > 2)) {
+      dist100mscount = 0;
        if (JOEL_ID[0] == 0x02)
        {
           JOEL_ID[0] = 0x03;
@@ -123,13 +128,16 @@ void loop()
     }
     if (lanewarnState == LOW) {
       lane100mscount++;
+      lane100mscount2++;
     } else {
       lane100mscount = 0;
+      lane100mscount2 = 0;
       relaystate2 = 1;
       Serial.println("relay2=0");
       digitalWrite(relay2, relaystate2);
     }
     if ((lanewarnState == LOW) && (lane100mscount > 2)) {
+       lane100mscount = 0;
        if (JOEL_ID[1] == 0x01)
        {
           JOEL_ID[1] = 0x00;
@@ -141,9 +149,9 @@ void loop()
     }
     CAN.sendMsgBuf(canSendId, 0, 3, JOEL_ID);
     //Serial.println(dist100mscount);
-    if ((fdistanceState == LOW) && (dist100mscount == 50)) {
+    if ((fdistanceState == LOW) && (dist100mscount2 == 50)) {
       //CAN.sendMsgBuf(canSendId, 0, 2, stmp);
-      dist100mscount = 0;
+      dist100mscount2 = 0;
       if (relaystate1 == 0){
         relaystate1 = 1;
         Serial.println("relay1=1");
@@ -156,11 +164,12 @@ void loop()
         digitalWrite(relay1, relaystate1);
       }
     }
-    if ((lanewarnState == LOW) && (lane100mscount > 5)) {
+    if ((lanewarnState == LOW) && (lane100mscount2 > 5)) {
       relaystate2 = 0;
       Serial.println("relay2=1");
       digitalWrite(relay2, relaystate2);
       if (fdistanceState == LOW) {
+       lane100mscount2 = 0;
        if (JOEL_ID[2] == 0x01)
        {
           JOEL_ID[2] = 0x00;
