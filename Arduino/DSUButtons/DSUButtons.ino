@@ -39,7 +39,7 @@ void setup()
 { 
   //GPIO
   pinMode(fdistance, INPUT_PULLUP);
-  pinMode(lanewarn, INPUT_PULLUP);
+  pinMode(lanewarn, INPUT);
   pinMode(relay1, OUTPUT);
   pinMode(relay2, OUTPUT);
 
