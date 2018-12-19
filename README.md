@@ -1,3 +1,4 @@
+-
 # Reenable DSU Buttons and Remotely Disable DSU on Rav4
 I noticed the following distance and Lane Keeping Alert buttons no longer did anything after installing Open Pilot and disabling the DSU. I wanted them back. So through some help from the internet and Comma Slack folks, I figured out what was needed.
 
@@ -37,6 +38,11 @@ I've included some amateur code for the Arduino that reads the buttons, writes C
 
 For the CAN Bus SPI board I bought, you have to use a custom library on the Arduino, since the normal code doesn't support the slower clock speed (8mhz.) Here it is:
 https://github.com/Flori1989/MCP2515_lib
+
+3D printed Part 1612050 
+https://www.thingiverse.com/thing:3170223
+Connector F 90980-12422
+https://www.toyotapartsdeal.com/oem/toyota~housing~connector~f~90980-12422.html
 
 ### Hardware Links
 #### CAN Module I used:
