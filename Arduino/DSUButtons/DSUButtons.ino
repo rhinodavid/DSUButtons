@@ -2,28 +2,28 @@
 #include "mcp_can.h"
 
 //IO Pins
-const int fdistance = 3;
-const int lanewarn = 4;
+const int followingDistance = 3;
+const int laneWarn = 4;
 
 //CAN
 const int SPI_CS_PIN = 10;
+const int canSendId = 0x203;
 MCP_CAN CAN(SPI_CS_PIN);
-unsigned long interval = 100; // the time we need to wait in between attempts to send messages
+unsigned long interval = 100; // ms; the time we need to wait in between attempts to send messages
 unsigned long previousTime = 0;
 unsigned long currentTime = 0;
-unsigned char JOEL_ID[3] = {0x02, 0x01, 0x00};
-int canSendId = 0x203;
+unsigned char messageBuffer[3] = {0x02, 0x01, 0x00};
 
 //Logic variables
-int fdistanceState = HIGH;
-int lanewarnState = HIGH;
-int lane100mscount = 0;
-int dist100mscount = 0;
+int followingDistanceState = HIGH;
+int laneWarnState = HIGH;
+unsigned int lane100mscount = 0;
+unsigned int dist100mscount = 0;
 
 void setup()
 {
-  pinMode(fdistance, INPUT_PULLUP);
-  pinMode(lanewarn, INPUT_PULLUP);
+  pinMode(followingDistance, INPUT_PULLUP);
+  pinMode(laneWarn, INPUT_PULLUP);
 
   Serial.begin(115200);
 
@@ -53,32 +53,32 @@ void setup()
 
 void loop()
 {
-  fdistanceState = digitalRead(fdistance);
-  lanewarnState = digitalRead(lanewarn);
+  followingDistanceState = digitalRead(followingDistance);
+  laneWarnState = digitalRead(laneWarn);
 
   currentTime = millis(); // grab current time
-  //check if "interval" time has passed (100 milliseconds)
-  if ((unsigned long)(currentTime - previousTime) >= interval)
+
+  if (currentTime - previousTime >= interval)
   {
-    if (fdistanceState == LOW)
+    if (followingDistanceState == LOW)
     {
       dist100mscount++;
 
       if (dist100mscount == 2)
       {
-        if (JOEL_ID[0] == 0x02)
+        if (messageBuffer[0] == 0x02)
         {
-          JOEL_ID[0] = 0x03;
+          messageBuffer[0] = 0x03;
           Serial.println("Follow distance set 3");
         }
-        else if (JOEL_ID[0] == 0x03)
+        else if (messageBuffer[0] == 0x03)
         {
-          JOEL_ID[0] = 0x01;
+          messageBuffer[0] = 0x01;
           Serial.println("Follow distance set 1");
         }
-        else if (JOEL_ID[0] == 0x01)
+        else if (messageBuffer[0] == 0x01)
         {
-          JOEL_ID[0] = 0x02;
+          messageBuffer[0] = 0x02;
           Serial.println("Follow distance set 2");
         }
       }
@@ -88,36 +88,36 @@ void loop()
       dist100mscount = 0;
     }
 
-    if (lanewarnState == LOW)
+    if (laneWarnState == LOW)
     {
       lane100mscount++;
 
       if (lane100mscount == 2)
       {
-        if (JOEL_ID[1] == 0x01)
+        if (messageBuffer[1] == 0x01)
         {
-          JOEL_ID[1] = 0x00;
+          messageBuffer[1] = 0x00;
           Serial.println("ID1 set 0");
         }
-        else if (JOEL_ID[1] == 0x00)
+        else if (messageBuffer[1] == 0x00)
         {
-          JOEL_ID[1] = 0x01;
+          messageBuffer[1] = 0x01;
           Serial.println("ID1 set 1");
         }
       }
 
       if (lane100mscount == 5)
       {
-        if (fdistanceState == LOW)
+        if (followingDistanceState == LOW)
         {
-          if (JOEL_ID[2] == 0x01)
+          if (messageBuffer[2] == 0x01)
           {
-            JOEL_ID[2] = 0x00;
+            messageBuffer[2] = 0x00;
             Serial.println("ID2 set 0");
           }
-          else if (JOEL_ID[2] == 0x00)
+          else if (messageBuffer[2] == 0x00)
           {
-            JOEL_ID[2] = 0x01;
+            messageBuffer[2] = 0x01;
             Serial.println("ID2 set 1");
           }
         }
@@ -128,7 +128,7 @@ void loop()
       lane100mscount = 0;
     }
 
-    CAN.sendMsgBuf(canSendId, 0, 3, JOEL_ID);
+    CAN.sendMsgBuf(canSendId, 0, 3, messageBuffer);
     previousTime = currentTime;
   }
 }
