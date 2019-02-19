@@ -41,7 +41,7 @@ void setup()
   }
   Serial.println("CAN BUS Shield initialized");
 
-  CAN.init_Mask(0, 0, 0xFFF); // there are 2 mask in mcp2515, you need to set both of them
+  CAN.init_Mask(0, 0, 0xFFF);
   CAN.init_Mask(1, 0, 0xFFF);
   CAN.init_Filt(0, 0, 0xFFF);
   CAN.init_Filt(1, 0, 0xFFF);
