@@ -2,12 +2,12 @@
 #include "mcp_can.h"
 
 //IO Pins
-const int followingDistance = 3;
-const int laneWarn = 4;
+const int FOLLOW_DISTANCE_PIN = 3;
+const int LANE_WARN_PIN = 4;
 
 //CAN
 const int SPI_CS_PIN = 10;
-const int canSendId = 0x203;
+const int CAN_SEND_ID = 0x203;
 MCP_CAN CAN(SPI_CS_PIN);
 unsigned long interval = 100; // ms; the time we need to wait in between attempts to send messages
 unsigned long previousTime = 0;
@@ -22,8 +22,8 @@ unsigned int dist100mscount = 0;
 
 void setup()
 {
-  pinMode(followingDistance, INPUT_PULLUP);
-  pinMode(laneWarn, INPUT_PULLUP);
+  pinMode(FOLLOW_DISTANCE_PIN, INPUT_PULLUP);
+  pinMode(LANE_WARN_PIN, INPUT_PULLUP);
 
   Serial.begin(115200);
 
@@ -53,8 +53,8 @@ void setup()
 
 void loop()
 {
-  followingDistanceState = digitalRead(followingDistance);
-  laneWarnState = digitalRead(laneWarn);
+  followingDistanceState = digitalRead(FOLLOW_DISTANCE_PIN);
+  laneWarnState = digitalRead(LANE_WARN_PIN);
 
   currentTime = millis(); // grab current time
 
@@ -128,7 +128,7 @@ void loop()
       lane100mscount = 0;
     }
 
-    CAN.sendMsgBuf(canSendId, 0, 3, messageBuffer);
+    CAN.sendMsgBuf(CAN_SEND_ID, 0, 3, messageBuffer);
     previousTime = currentTime;
   }
 }
