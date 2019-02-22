@@ -2,8 +2,13 @@
 #include "mcp_can.h"
 
 //IO Pins
-const int FOLLOW_DISTANCE_PIN = 3;
-const int LANE_WARN_PIN = 4;
+const int FOLLOW_DISTANCE_SWITCH_PIN = 3;
+const int FOLLOW_DISTANCE_LED_PIN = 12;
+const int LANE_WARN_SWITCH_PIN = 4;
+const int LANE_WARN_LED_PIN = 13;
+
+const unsigned int LED_DURATION_SHORT = 250; // ms
+const unsigned int LED_DURATION_LONG = 750;  // ms
 
 //CAN
 const int SPI_CS_PIN = 10;
@@ -19,11 +24,13 @@ int followingDistanceState = HIGH;
 int laneWarnState = HIGH;
 unsigned int lane100mscount = 0;
 unsigned int dist100mscount = 0;
+unsigned int laneWarnLedOffTime = 0;       // ms
+unsigned int followDistanceLedOffTime = 0; // ms
 
 void setup()
 {
-  pinMode(FOLLOW_DISTANCE_PIN, INPUT_PULLUP);
-  pinMode(LANE_WARN_PIN, INPUT_PULLUP);
+  pinMode(FOLLOW_DISTANCE_SWITCH_PIN, INPUT_PULLUP);
+  pinMode(LANE_WARN_SWITCH_PIN, INPUT_PULLUP);
 
   Serial.begin(115200);
 
@@ -51,12 +58,29 @@ void setup()
   CAN.init_Filt(5, 0, 0xFFF);
 }
 
+void checkLedForShutoff(int pinNumber, unsigned int currentTime /* ms */, unsigned int offTime /* ms */)
+{
+  if (currentTime > offTime)
+  {
+    digitalWrite(pinNumber, LOW);
+  }
+}
+
+void turnOnLed(int pinNumber, int *offTimeVar, unsigned int currentTime /* ms */, unsigned int onDuration /* ms */)
+{
+  digitalWrite(pinNumber, HIGH);
+  *offTimeVar = currentTime + onDuration;
+}
+
 void loop()
 {
-  followingDistanceState = digitalRead(FOLLOW_DISTANCE_PIN);
-  laneWarnState = digitalRead(LANE_WARN_PIN);
+  followingDistanceState = digitalRead(FOLLOW_DISTANCE_SWITCH_PIN);
+  laneWarnState = digitalRead(LANE_WARN_SWITCH_PIN);
 
   currentTime = millis(); // grab current time
+
+  checkLedForShutoff(FOLLOW_DISTANCE_LED_PIN, currentTime, followDistanceLedOffTime);
+  checkLedForShutoff(LANE_WARN_LED_PIN, currentTime, laneWarnLedOffTime);
 
   if (currentTime - previousTime >= interval)
   {
@@ -66,6 +90,7 @@ void loop()
 
       if (dist100mscount == 2)
       {
+        turnOnLed(FOLLOW_DISTANCE_LED_PIN, &followDistanceLedOffTime, currentTime, LED_DURATION_SHORT);
         if (messageBuffer[0] == 0x02)
         {
           messageBuffer[0] = 0x03;
@@ -94,6 +119,7 @@ void loop()
 
       if (lane100mscount == 2)
       {
+        turnOnLed(LANE_WARN_LED_PIN, &laneWarnLedOffTime, currentTime, LED_DURATION_SHORT);
         if (messageBuffer[1] == 0x01)
         {
           messageBuffer[1] = 0x00;
@@ -109,6 +135,7 @@ void loop()
       if (lane100mscount == 5)
       {
         if (followingDistanceState == LOW)
+          turnOnLed(LANE_WARN_LED_PIN, &laneWarnLedOffTime, currentTime, LED_DURATION_LONG);
         {
           if (messageBuffer[2] == 0x01)
           {
