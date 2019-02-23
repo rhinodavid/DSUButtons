@@ -56,6 +56,11 @@ void turnOnLed(ledIndicator *led, unsigned int currentTime /* ms */, unsigned in
   led->offTime = currentTime + onDuration;
 }
 
+void sendCanMessage()
+{
+  CAN.sendMsgBuf(CAN_SEND_ID, 0, 3, messageBuffer);
+}
+
 void setup()
 {
   pinMode(FOLLOW_DISTANCE_SWITCH_PIN, INPUT_PULLUP);
@@ -90,6 +95,19 @@ void setup()
   CAN.init_Filt(3, 0, 0xFFF);
   CAN.init_Filt(4, 0, 0xFFF);
   CAN.init_Filt(5, 0, 0xFFF);
+
+  // blink the LEDs
+  digitalWrite(followDistanceIndicator.pinNumber, HIGH);
+  delay(100);
+  digitalWrite(followDistanceIndicator.pinNumber, LOW);
+  digitalWrite(laneWarnIndicator.pinNumber, HIGH);
+  delay(100);
+  digitalWrite(followDistanceIndicator.pinNumber, HIGH);
+  digitalWrite(laneWarnIndicator.pinNumber, LOW);
+  delay(100);
+  digitalWrite(followDistanceIndicator.pinNumber, LOW);
+
+  sendCanMessage();
 }
 
 void loop()
@@ -126,6 +144,8 @@ void loop()
           messageBuffer[0] = 0x02;
           Serial.println("Follow distance set 2");
         }
+
+        sendCanMessage();
       }
     }
     else
@@ -151,13 +171,13 @@ void loop()
           Serial.println("Lane warn set 1");
         }
       }
+      sendCanMessage();
     }
     else
     {
       lane100mscount = 0;
     }
 
-    CAN.sendMsgBuf(CAN_SEND_ID, 0, 3, messageBuffer);
     previousTime = currentTime;
   }
 }
