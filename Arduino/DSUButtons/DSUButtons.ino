@@ -34,6 +34,20 @@ unsigned int dist100mscount = 0;
 unsigned int laneWarnLedOffTime = 0;       // ms
 unsigned int followDistanceLedOffTime = 0; // ms
 
+void checkLedForShutoff(ledIndicator *led, unsigned int currentTime /* ms */)
+{
+  if (currentTime > led->offTime)
+  {
+    digitalWrite(led->pinNumber, LOW);
+  }
+}
+
+void turnOnLed(ledIndicator *led, unsigned int currentTime /* ms */, unsigned int onDuration /* ms */)
+{
+  digitalWrite(led->pinNumber, HIGH);
+  led->offTime = currentTime + onDuration;
+}
+
 void setup()
 {
   pinMode(FOLLOW_DISTANCE_SWITCH_PIN, INPUT_PULLUP);
@@ -68,20 +82,6 @@ void setup()
   CAN.init_Filt(3, 0, 0xFFF);
   CAN.init_Filt(4, 0, 0xFFF);
   CAN.init_Filt(5, 0, 0xFFF);
-}
-
-void checkLedForShutoff(ledIndicator *led, unsigned int currentTime /* ms */)
-{
-  if (currentTime > led->offTime)
-  {
-    digitalWrite(led->pinNumber, LOW);
-  }
-}
-
-void turnOnLed(ledIndicator *led, unsigned int currentTime /* ms */, unsigned int onDuration /* ms */)
-{
-  digitalWrite(led->pinNumber, HIGH);
-  led->offTime = currentTime + onDuration;
 }
 
 void loop()
