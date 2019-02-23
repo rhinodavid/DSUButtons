@@ -24,6 +24,14 @@ MCP_CAN CAN(SPI_CS_PIN);
 unsigned long interval = 100; // ms; the time we need to wait in between attempts to send messages
 unsigned long previousTime = 0;
 unsigned long currentTime = 0;
+/*
+ * CAN Message
+ * Format is:
+ * BO_ 515 DSU_BUTTONS: 8 XXX
+ *  SG_ ACC_DISTANCE : 1|2@0+ (1,0) [1|3] "" XXX
+ *  SG_ LANE_WARNING : 8|1@0+ (1,0) [0|1] "" XXX
+ *  SG_ ACC_SLOW : 16|1@0+ (1,0) [0|1] "" XXX
+ */
 unsigned char messageBuffer[3] = {0x02, 0x01, 0x00};
 
 //Logic variables
@@ -135,12 +143,12 @@ void loop()
         if (messageBuffer[1] == 0x01)
         {
           messageBuffer[1] = 0x00;
-          Serial.println("ID1 set 0");
+          Serial.println("Lane warn set 0");
         }
         else if (messageBuffer[1] == 0x00)
         {
           messageBuffer[1] = 0x01;
-          Serial.println("ID1 set 1");
+          Serial.println("Lane warn set 1");
         }
       }
     }
