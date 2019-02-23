@@ -10,17 +10,17 @@ typedef struct
 
 typedef enum
 {
-  laneWarnShort,
-  laneWarnLong,
-  followDistanceShort,
-  followDistanceLong,
+  laneWarningShortPress,
+  laneWarningLongPress,
+  followDistanceShortPress,
+  followDistanceLongPress,
 } buttonPress;
 
 //IO Pins
 const int FOLLOW_DISTANCE_SWITCH_PIN = 3;
 const int LANE_WARN_SWITCH_PIN = 4;
 
-ledIndicator laneWarnIndicator = {9, 0};
+ledIndicator laneWarningIndicator = {9, 0};
 ledIndicator followDistanceIndicator = {8, 0};
 
 const unsigned int LED_DURATION_SHORT = 250; // ms
@@ -44,9 +44,12 @@ unsigned long currentTime = 0;
  *  SG_ ACC_SLOW : 16|1@0+ (1,0) [0|1] "" XXX
  */
 unsigned char canMessageBuffer[3] = {0x02, 0x01, 0x00};
+const int ACC_DISTANCE_CAN_POSITION = 0;
+const int LANE_WARNING_CAN_POSITION = 1;
+const int ACC_SLOW_CAN_POSITION = 2;
 StackArray<buttonPress> pendingButtonPresses;
 
-unsigned int laneWarnPressSamples = 0;
+unsigned int laneWarningPressSamples = 0;
 unsigned int followDistancePressSamples = 0;
 
 //Logic variables
@@ -81,10 +84,10 @@ void setup()
   pinMode(FOLLOW_DISTANCE_SWITCH_PIN, INPUT_PULLUP);
   pinMode(LANE_WARN_SWITCH_PIN, INPUT_PULLUP);
   pinMode(followDistanceIndicator.pinNumber, OUTPUT);
-  pinMode(laneWarnIndicator.pinNumber, OUTPUT);
+  pinMode(laneWarningIndicator.pinNumber, OUTPUT);
 
   digitalWrite(followDistanceIndicator.pinNumber, LOW);
-  digitalWrite(laneWarnIndicator.pinNumber, LOW);
+  digitalWrite(laneWarningIndicator.pinNumber, LOW);
 
   Serial.begin(115200);
 
@@ -115,10 +118,10 @@ void setup()
   digitalWrite(followDistanceIndicator.pinNumber, HIGH);
   delay(100);
   digitalWrite(followDistanceIndicator.pinNumber, LOW);
-  digitalWrite(laneWarnIndicator.pinNumber, HIGH);
+  digitalWrite(laneWarningIndicator.pinNumber, HIGH);
   delay(100);
   digitalWrite(followDistanceIndicator.pinNumber, HIGH);
-  digitalWrite(laneWarnIndicator.pinNumber, LOW);
+  digitalWrite(laneWarningIndicator.pinNumber, LOW);
   delay(100);
   digitalWrite(followDistanceIndicator.pinNumber, LOW);
 
@@ -130,7 +133,7 @@ void loop()
   currentTime = millis(); // grab current time
 
   checkLedForShutoff(&followDistanceIndicator, currentTime);
-  checkLedForShutoff(&laneWarnIndicator, currentTime);
+  checkLedForShutoff(&laneWarningIndicator, currentTime);
 
   // sample buttons
   if (currentTime - previousButtonSampleTime >= buttonSampleInterval)
@@ -146,31 +149,31 @@ void loop()
     {
       if (followDistancePressSamples > 10)
       {
-        pendingButtonPresses.push(followDistanceLong);
+        pendingButtonPresses.push(followDistanceLongPress);
       }
       else if (followDistancePressSamples > 2)
       {
-        pendingButtonPresses.push(followDistanceShort);
+        pendingButtonPresses.push(followDistanceShortPress);
       }
       followDistancePressSamples = 0;
     }
 
     if (laneWarnState == LOW)
     {
-      laneWarnPressSamples++;
+      laneWarningPressSamples++;
     }
     else
     {
-      if (laneWarnPressSamples > 10)
+      if (laneWarningPressSamples > 10)
       {
-        pendingButtonPresses.push(laneWarnLong);
+        pendingButtonPresses.push(laneWarningLongPress);
       }
-      else if (laneWarnPressSamples > 2)
+      else if (laneWarningPressSamples > 2)
       {
-        pendingButtonPresses.push(laneWarnShort);
+        pendingButtonPresses.push(laneWarningShortPress);
       }
 
-      laneWarnPressSamples = 0;
+      laneWarningPressSamples = 0;
     }
     previousButtonSampleTime = currentTime;
   }
@@ -184,47 +187,47 @@ void loop()
       buttonPress press = pendingButtonPresses.pop();
       switch (press)
       {
-      case followDistanceShort:
+      case followDistanceShortPress:
         turnOnLed(&followDistanceIndicator, currentTime, LED_DURATION_SHORT);
-        if (canMessageBuffer[0] == 0x02)
+        if (canMessageBuffer[ACC_DISTANCE_CAN_POSITION] == 0x02)
         {
-          canMessageBuffer[0] = 0x03;
+          canMessageBuffer[ACC_DISTANCE_CAN_POSITION] = 0x03;
           Serial.println("Follow distance set 3");
         }
-        else if (canMessageBuffer[0] == 0x03)
+        else if (canMessageBuffer[ACC_DISTANCE_CAN_POSITION] == 0x03)
         {
-          canMessageBuffer[0] = 0x01;
+          canMessageBuffer[ACC_DISTANCE_CAN_POSITION] = 0x01;
           Serial.println("Follow distance set 1");
         }
-        else if (canMessageBuffer[0] == 0x01)
+        else if (canMessageBuffer[ACC_DISTANCE_CAN_POSITION] == 0x01)
         {
-          canMessageBuffer[0] = 0x02;
+          canMessageBuffer[ACC_DISTANCE_CAN_POSITION] = 0x02;
           Serial.println("Follow distance set 2");
         }
         canUpdated = true;
         break;
-      case followDistanceLong:
+      case followDistanceLongPress:
         turnOnLed(&followDistanceIndicator, currentTime, LED_DURATION_LONG);
         // not doing anything else right now
         break;
-      case laneWarnShort:
+      case laneWarningShortPress:
       {
-        turnOnLed(&laneWarnIndicator, currentTime, LED_DURATION_SHORT);
-        if (canMessageBuffer[1] == 0x01)
+        turnOnLed(&laneWarningIndicator, currentTime, LED_DURATION_SHORT);
+        if (canMessageBuffer[LANE_WARNING_CAN_POSITION] == 0x01)
         {
-          canMessageBuffer[1] = 0x00;
+          canMessageBuffer[LANE_WARNING_CAN_POSITION] = 0x00;
           Serial.println("Lane warn set 0");
         }
-        else if (canMessageBuffer[1] == 0x00)
+        else if (canMessageBuffer[LANE_WARNING_CAN_POSITION] == 0x00)
         {
-          canMessageBuffer[1] = 0x01;
+          canMessageBuffer[LANE_WARNING_CAN_POSITION] = 0x01;
           Serial.println("Lane warn set 1");
         }
       }
         canUpdated = true;
         break;
-      case laneWarnLong:
-        turnOnLed(&laneWarnIndicator, currentTime, LED_DURATION_LONG);
+      case laneWarningLongPress:
+        turnOnLed(&laneWarningIndicator, currentTime, LED_DURATION_LONG);
         // not doing anything else right now
         break;
       }
