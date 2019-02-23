@@ -3,9 +3,9 @@
 
 //IO Pins
 const int FOLLOW_DISTANCE_SWITCH_PIN = 3;
-const int FOLLOW_DISTANCE_LED_PIN = 12;
+const int FOLLOW_DISTANCE_LED_PIN = 8;
 const int LANE_WARN_SWITCH_PIN = 4;
-const int LANE_WARN_LED_PIN = 13;
+const int LANE_WARN_LED_PIN = 9;
 
 const unsigned int LED_DURATION_SHORT = 250; // ms
 const unsigned int LED_DURATION_LONG = 750;  // ms
@@ -31,13 +31,18 @@ void setup()
 {
   pinMode(FOLLOW_DISTANCE_SWITCH_PIN, INPUT_PULLUP);
   pinMode(LANE_WARN_SWITCH_PIN, INPUT_PULLUP);
+  pinMode(LANE_WARN_LED_PIN, OUTPUT);
+  pinMode(FOLLOW_DISTANCE_LED_PIN, OUTPUT);
+
+  digitalWrite(LANE_WARN_LED_PIN, LOW);
+  digitalWrite(FOLLOW_DISTANCE_LED_PIN, LOW);
 
   Serial.begin(115200);
 
   SPI.begin();
   SPI.setClockDivider(SPI_CLOCK_DIV2);
 
-  delay(9000);
+  delay(5000);
 
   Serial.println("Initializing CAN Shield");
   while (CAN_OK != CAN.begin(CAN_500KBPS)) // init can bus : baudrate = 500                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            00k
@@ -68,6 +73,7 @@ void checkLedForShutoff(int pinNumber, unsigned int currentTime /* ms */, unsign
 
 void turnOnLed(int pinNumber, int *offTimeVar, unsigned int currentTime /* ms */, unsigned int onDuration /* ms */)
 {
+  Serial.println("PIN ON");
   digitalWrite(pinNumber, HIGH);
   *offTimeVar = currentTime + onDuration;
 }
