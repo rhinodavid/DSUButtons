@@ -105,15 +105,6 @@ void setup()
   }
   Serial.println("CAN BUS Shield initialized");
 
-  CAN.init_Mask(0, 0, 0xFFF);
-  CAN.init_Mask(1, 0, 0xFFF);
-  CAN.init_Filt(0, 0, 0xFFF);
-  CAN.init_Filt(1, 0, 0xFFF);
-  CAN.init_Filt(2, 0, 0xFFF);
-  CAN.init_Filt(3, 0, 0xFFF);
-  CAN.init_Filt(4, 0, 0xFFF);
-  CAN.init_Filt(5, 0, 0xFFF);
-
   // blink the LEDs
   digitalWrite(followDistanceIndicator.pinNumber, HIGH);
   delay(100);
