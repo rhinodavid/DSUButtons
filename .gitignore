@@ -3,6 +3,6 @@
 .DS_Store?
 .Spotlight-V100
 .Trashes
-.vscode
+.vscode/*
 ehthumbs.db
 Thumbs.db
