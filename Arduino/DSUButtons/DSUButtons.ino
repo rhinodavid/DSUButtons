@@ -21,7 +21,7 @@ const unsigned int LED_DURATION_LONG = 750;  // ms
 const int SPI_CS_PIN = 10;
 const int CAN_SEND_ID = 0x203;
 MCP_CAN CAN(SPI_CS_PIN);
-unsigned long interval = 100; // ms; the time we need to wait in between attempts to send messages
+unsigned long interval = 75; // ms; the time we need to wait in between attempts to send messages
 unsigned long previousTime = 0;
 unsigned long currentTime = 0;
 /*
