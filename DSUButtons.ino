@@ -43,7 +43,7 @@ unsigned long currentTime = 0;
  *  SG_ LANE_WARNING : 8|1@0+ (1,0) [0|1] "" XXX
  *  SG_ ACC_SLOW : 16|1@0+ (1,0) [0|1] "" XXX
  */
-unsigned char canMessageBuffer[3] = {0x02, 0x01, 0x00};
+unsigned char canMessageBuffer[8] = {0x02, 0x01, 0x00, 0, 0, 0, 0, 0};
 const int ACC_DISTANCE_CAN_POSITION = 0;
 const int LANE_WARNING_CAN_POSITION = 1;
 const int ACC_SLOW_CAN_POSITION = 2;
@@ -76,7 +76,7 @@ void turnOnLed(ledIndicator *led, unsigned long currentTime /* ms */, unsigned i
 
 void sendCanMessage()
 {
-  CAN.sendMsgBuf(CAN_SEND_ID, 0, 3, canMessageBuffer);
+  CAN.sendMsgBuf(CAN_SEND_ID, 0, 8, canMessageBuffer);
 }
 
 void setup()
