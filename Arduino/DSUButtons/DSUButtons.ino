@@ -143,24 +143,6 @@ void loop()
           Serial.println("ID1 set 1");
         }
       }
-
-      if (lane100mscount == 5)
-      {
-        if (followingDistanceState == LOW)
-          turnOnLed(&laneWarnIndicator, currentTime, LED_DURATION_LONG);
-        {
-          if (messageBuffer[2] == 0x01)
-          {
-            messageBuffer[2] = 0x00;
-            Serial.println("ID2 set 0");
-          }
-          else if (messageBuffer[2] == 0x00)
-          {
-            messageBuffer[2] = 0x01;
-            Serial.println("ID2 set 1");
-          }
-        }
-      }
     }
     else
     {
