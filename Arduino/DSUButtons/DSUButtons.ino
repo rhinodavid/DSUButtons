@@ -23,7 +23,7 @@ const int LANE_WARN_SWITCH_PIN = 4;
 ledIndicator laneWarnIndicator = {9, 0};
 ledIndicator followDistanceIndicator = {8, 0};
 
-const unsigned int LED_DURATION_SHORT = 333; // ms
+const unsigned int LED_DURATION_SHORT = 250; // ms
 const unsigned int LED_DURATION_LONG = 750;  // ms
 
 //CAN
