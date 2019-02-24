@@ -173,7 +173,6 @@ void loop()
   // handle pending putton presses
   if (currentTime - previousCanTime >= canInterval)
   {
-    bool canUpdated = false;
     while (!pendingButtonPresses.isEmpty())
     {
       buttonPress press = pendingButtonPresses.pop();
@@ -196,7 +195,6 @@ void loop()
           canMessageBuffer[ACC_DISTANCE_CAN_POSITION] = 0x02;
           Serial.println("Follow distance set 2");
         }
-        canUpdated = true;
         break;
       case followDistanceLongPress:
         turnOnLed(&followDistanceIndicator, currentTime, LED_DURATION_LONG);
@@ -216,15 +214,13 @@ void loop()
           Serial.println("Lane warn set 1");
         }
       }
-        canUpdated = true;
-        break;
+      break;
       case laneWarningLongPress:
         turnOnLed(&laneWarningIndicator, currentTime, LED_DURATION_LONG);
         // not doing anything else right now
         break;
       }
-      if (canUpdated)
-        sendCanMessage();
+      sendCanMessage();
     }
     previousCanTime = currentTime;
   }
