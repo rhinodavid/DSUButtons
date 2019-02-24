@@ -41,12 +41,10 @@ unsigned long currentTime = 0;
  * BO_ 515 DSU_BUTTONS: 8 XXX
  *  SG_ ACC_DISTANCE : 1|2@0+ (1,0) [1|3] "" XXX
  *  SG_ LANE_WARNING : 8|1@0+ (1,0) [0|1] "" XXX
- *  SG_ ACC_SLOW : 16|1@0+ (1,0) [0|1] "" XXX
  */
-unsigned char canMessageBuffer[8] = {0x02, 0x01, 0x00, 0, 0, 0, 0, 0};
+unsigned char canMessageBuffer[8] = {0x01, 0x01, 0x00, 0, 0, 0, 0, 0};
 const int ACC_DISTANCE_CAN_POSITION = 0;
 const int LANE_WARNING_CAN_POSITION = 1;
-const int ACC_SLOW_CAN_POSITION = 2;
 StackArray<buttonPress> pendingButtonPresses;
 
 unsigned int laneWarningPressSamples = 0;
