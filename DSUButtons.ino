@@ -106,12 +106,15 @@ void setup()
   // blink the LEDs
   digitalWrite(followDistanceIndicator.pinNumber, HIGH);
   delay(100);
-  digitalWrite(followDistanceIndicator.pinNumber, LOW);
-  digitalWrite(laneWarningIndicator.pinNumber, HIGH);
-  delay(100);
-  digitalWrite(followDistanceIndicator.pinNumber, HIGH);
-  digitalWrite(laneWarningIndicator.pinNumber, LOW);
-  delay(100);
+  for (int i = 0; i < 9; i++)
+  {
+    digitalWrite(followDistanceIndicator.pinNumber, LOW);
+    digitalWrite(laneWarningIndicator.pinNumber, HIGH);
+    delay(100);
+    digitalWrite(followDistanceIndicator.pinNumber, HIGH);
+    digitalWrite(laneWarningIndicator.pinNumber, LOW);
+    delay(100);
+  }
   digitalWrite(followDistanceIndicator.pinNumber, LOW);
 
   sendCanMessage();
